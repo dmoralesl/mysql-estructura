@@ -144,12 +144,6 @@ ENGINE = InnoDB;
 CREATE TABLE IF NOT EXISTS `pizzeria`.`order` (
   `id_order` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `order_datetime` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `product_1` INT UNSIGNED NOT NULL,
-  `product_1_number` TINYINT UNSIGNED NOT NULL,
-  `product_2` INT UNSIGNED NULL,
-  `product_2_number` TINYINT UNSIGNED NULL,
-  `product_3` INT UNSIGNED NULL,
-  `product_3_number` TINYINT UNSIGNED NULL,
   `price` FLOAT NOT NULL,
   `type` ENUM("delivery", "take away") NOT NULL,
   `client` INT NOT NULL,
@@ -160,9 +154,6 @@ CREATE TABLE IF NOT EXISTS `pizzeria`.`order` (
   INDEX `client_idx` (`client` ASC) VISIBLE,
   INDEX `shop_idx` (`shop` ASC) VISIBLE,
   INDEX `delivery_idx` (`driver` ASC) VISIBLE,
-  INDEX `product1_idx` (`product_1` ASC) VISIBLE,
-  INDEX `product2_idx` (`product_2` ASC) VISIBLE,
-  INDEX `product3_idx` (`product_3` ASC) VISIBLE,
   CONSTRAINT `client_order`
     FOREIGN KEY (`client`)
     REFERENCES `pizzeria`.`client` (`id_client`)
@@ -177,25 +168,31 @@ CREATE TABLE IF NOT EXISTS `pizzeria`.`order` (
     FOREIGN KEY (`driver`)
     REFERENCES `pizzeria`.`employee` (`id_employee`)
     ON DELETE SET NULL
-    ON UPDATE CASCADE,
-  CONSTRAINT `product1_oder`
-    FOREIGN KEY (`product_1`)
-    REFERENCES `pizzeria`.`product` (`id_product`)
-    ON DELETE RESTRICT
-    ON UPDATE CASCADE,
-  CONSTRAINT `product2_oder`
-    FOREIGN KEY (`product_2`)
-    REFERENCES `pizzeria`.`product` (`id_product`)
-    ON DELETE SET NULL
-    ON UPDATE CASCADE,
-  CONSTRAINT `product3_oder`
-    FOREIGN KEY (`product_3`)
-    REFERENCES `pizzeria`.`product` (`id_product`)
-    ON DELETE SET NULL
     ON UPDATE CASCADE)
 ENGINE = InnoDB;
 
 
+
+-- -----------------------------------------------------
+-- Table `pizzeria`.`order_detail`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `pizzeria`.`order_detail` (
+  `order` INT UNSIGNED NOT NULL,
+  `product` INT UNSIGNED NOT NULL,
+  `number` INT UNSIGNED NOT NULL,
+  PRIMARY KEY (`product`, `order`),
+  INDEX `order_detail_order_idx` (`order` ASC) VISIBLE,
+  CONSTRAINT `order_detail_order`
+    FOREIGN KEY (`order`)
+    REFERENCES `pizzeria`.`order` (`id_order`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
+  CONSTRAINT `order_detail_product`
+    FOREIGN KEY (`product`)
+    REFERENCES `pizzeria`.`product` (`id_product`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE)
+ENGINE = InnoDB;
 
 -- DATA 
 
@@ -5596,6 +5593,24 @@ VALUES
   (14, 'Calle Inventada, 14', '28014', 1019 , 14),
   (15, 'Calle Inventada, 15', '28015', 1019 , 15);
 
+-- Clients
+INSERT INTO `pizzeria`.`client` 
+(`id_client`, 
+`name`, 
+`surname`, 
+`address`, 
+`postal_code`, 
+`city`, 
+`province`, 
+`phone`) 
+VALUES 
+(1, 'Client 1' , 'Random', 'Street 123', '55555', 1016, 1, '999999999'),
+(2, 'Client 2' , 'Random', 'Street 123', '55555', 1016, 1, '999999999'),
+(3, 'Client 3' , 'Random', 'Street 123', '55555', 1016, 1, '999999999'),
+(4, 'Client 4' , 'Random', 'Street 123', '55555', 1016, 1, '999999999'),
+(5, 'Client 5' , 'Random', 'Street 123', '55555', 1016, 1, '999999999'),
+(6, 'Client 6' , 'Random', 'Street 123', '55555', 1016, 1, '999999999'),
+(7, 'Client 7' , 'Random', 'Street 123', '55555', 1016, 1, '999999999');
 
 -- Employees
 INSERT INTO `pizzeria`.`employee`
@@ -5632,12 +5647,6 @@ VALUES
 -- Orders
 INSERT INTO `pizzeria`.`order`
 (`id_order`,
-`product_1`,
-`product_1_number`,
-`product_2`,
-`product_2_number`,
-`product_3`,
-`product_3_number`,
 `price`,
 `type`,
 `client`,
@@ -5645,25 +5654,43 @@ INSERT INTO `pizzeria`.`order`
 `driver`,
 `delivery_datetime`)
 VALUES
-(1, 1, 3, null, null, null, null, 64.24, 'delivery', 1, 1, 1, CURRENT_TIMESTAMP),
-(2, 2, 2, 21, 1, 26, 2, 221.99, 'delivery', 1, 8, 10, CURRENT_TIMESTAMP),
-(3, 3, 1, 24, 2, 11, 4, 21.20, 'take away', 2, 3, null, null),
-(4, 4, 1, null, null, null, null, 12.50, 'delivery', 2, 3, 3, CURRENT_TIMESTAMP),
-(5, 12, 2, 20, 1, 15, 2, 100, 'delivery', 3, 4, 4, CURRENT_TIMESTAMP),
-(6, 19, 9, null, null, null, null, 12.90, 'take away', 6, 4, null, null),
-(7, 23, 12, 16, 3, null, null, 33.40, 'take away', 6, 4, null, null),
-(8, 4, 1, null, null, null, null, 21.40, 'delivery', 4, 8, 8, CURRENT_TIMESTAMP),
-(9, 31, 1, 26, 2, 3, 6, 37.20, 'delivery', 5, 8, 8, CURRENT_TIMESTAMP),
-(10, 14, 2, 24, 1, null, null, 82.15, 'take away', 6, 8, null, null),
-(11, 18, 7, 13, 5, 29, 2, 22.19, 'take away', 9, 9, null, null),
-(12, 3, 4, null, null, null, null, 92.93, 'take away', 9, 11, null, null),
-(13, 2, 2, 13, 11, null, null, 11.11, 'delivery', 9, 12, 14, CURRENT_TIMESTAMP),
-(14, 33, 1, null, null, null, null, 22.22, 'take away', 10, 13, null, null);
+(1, 64.24, 'delivery', 1, 1, 1, CURRENT_TIMESTAMP),
+(2, 221.99, 'delivery', 1, 8, 10, CURRENT_TIMESTAMP),
+(3, 21.20, 'take away', 2, 3, null, null),
+(4, 12.50, 'delivery', 2, 3, 3, CURRENT_TIMESTAMP),
+(5, 100, 'delivery', 3, 4, 4, CURRENT_TIMESTAMP),
+(6, 12.90, 'take away', 3, 4, null, null),
+(7, 33.40, 'take away', 3, 4, null, null),
+(8, 21.40, 'delivery', 4, 8, 8, CURRENT_TIMESTAMP),
+(9, 37.20, 'delivery', 5, 8, 8, CURRENT_TIMESTAMP),
+(10, 82.15, 'take away', 5, 8, null, null),
+(11, 22.19, 'take away', 6, 9, null, null),
+(12, 92.93, 'take away', 6, 11, null, null),
+(13, 11.11, 'delivery', 6, 12, 14, CURRENT_TIMESTAMP),
+(14, 22.22, 'take away', 7, 13, null, null);
 
-
-
+-- Order_details
+INSERT INTO `pizzeria`.`order_detail` (`order`, `product`, `number`) 
+VALUES 
+(1, 1, 3),
+(1, 4, 3),
+(2, 20, 10),
+(3, 15, 3),
+(3, 9, 9),
+(3, 10, 1),
+(4, 22, 3),
+(5, 3, 4),
+(6, 1, 1),
+(7, 14, 2),
+(8, 19, 2),
+(9, 31, 2),
+(10, 12, 29),
+(11, 1, 1),
+(12, 17, 2),
+(13, 34, 5),
+(14, 11, 1);
 
 -- QUERIES 
-SELECT COUNT(*) FROM `order` INNER JOIN shop ON `order`.shop = shop.id_shop INNER JOIN city ON shop.city = city.id_city INNER JOIN product ON (order.product_1 = product.id_product OR order.product_2 = product.id_product OR order.product_3 = product.id_product) WHERE product.type = 'drink' AND city.name = 'Asparrena';  
+SELECT SUM(order_detail.number) FROM `order_detail` INNER JOIN `order` ON order_detail.`order` = `order`.id_order INNER JOIN shop ON `order`.shop = shop.id_shop INNER JOIN city ON shop.city = city.id_city INNER JOIN product ON order_detail.product = product.id_product WHERE product.type = 'drink' AND city.name = 'Asparrena'; 
 SELECT COUNT(*) FROM `order` INNER JOIN employee ON `order`.driver = employee.id_employee WHERE CONCAT(employee.name, " ", employee.surname) = 'Rosa Melano';
 
