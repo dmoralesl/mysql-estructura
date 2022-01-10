@@ -31,12 +31,18 @@ CREATE TABLE IF NOT EXISTS `spotify`.`subscription` (
   `user` INT NOT NULL,
   `start_subscription` DATETIME NOT NULL DEFAULT NOW(),
   `end_subscription` DATETIME NOT NULL,
-  `payment` ENUM("card", "paypal") NOT NULL,
+  `payment` INT NOT NULL,
   PRIMARY KEY (`id_subscription`),
   INDEX `user_subscription_idx` (`user` ASC) VISIBLE,
+  INDEX `payment_subscription_idx` (`payment` ASC) VISIBLE,
   CONSTRAINT `user_subscription`
     FOREIGN KEY (`user`)
     REFERENCES `spotify`.`user` (`id_user`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
+  CONSTRAINT `payment_subscription`
+    FOREIGN KEY (`payment`)
+    REFERENCES `spotify`.`payment` (`id_payment`)
     ON DELETE CASCADE
     ON UPDATE CASCADE)
 ENGINE = InnoDB;
@@ -71,6 +77,7 @@ CREATE TABLE IF NOT EXISTS `spotify`.`payment` (
   `card` INT NOT NULL,
   `amount` INT NOT NULL,
   `payment_date` DATETIME NULL DEFAULT NOW(),
+  `type` ENUM('card', 'paypal') NOT NULL,
   PRIMARY KEY (`id_payment`),
   INDEX `user_payment_idx` (`user` ASC) VISIBLE,
   CONSTRAINT `user_payment`
@@ -293,12 +300,12 @@ VALUES
 -- Subscription
 INSERT INTO `spotify`.`subscription` (`user`, `start_subscription`, `end_subscription`, `payment`) 
 VALUES 
-(3, DATE('2020-05-05'), '2025-05-05', 'paypal'),
-(5, DATE('2021-05-05'), '2026-05-05', 'paypal'),
-(6, DATE('2022-05-05'), '2027-05-05', 'card'),
-(10, DATE('2023-05-05'), '2028-05-05', 'card'),
-(11, DATE('2024-05-05'), '2029-05-05', 'paypal'),
-(12, DATE('2025-05-05'), '2030-05-05', 'card');
+(3, DATE('2020-05-05'), '2025-05-05', 1),
+(5, DATE('2021-05-05'), '2026-05-05', 2),
+(6, DATE('2022-05-05'), '2027-05-05', 3),
+(10, DATE('2023-05-05'), '2028-05-05', 4),
+(11, DATE('2024-05-05'), '2029-05-05', 5),
+(12, DATE('2025-05-05'), '2030-05-05', 6);
 
 
 -- Card
@@ -312,17 +319,17 @@ VALUES
 (12, '1234567890122456', '2025-04-05', '124', 'user6');
 
 -- Payment
-INSERT INTO `spotify`.`payment` (`user`, `card`, `amount`, `payment_date`) 
+INSERT INTO `spotify`.`payment` (`user`, `card`, `amount`, `payment_date`, `type`) 
 VALUES 
-(3, 1, '100', DATE('2020-05-05')),
-(3, 1, '100', DATE('2018-05-05')),
-(5, 2, '200', DATE('2021-05-05')),
-(6, 3, '300', DATE('2022-05-05')),
-(10, 4, '400', DATE('2017-05-05')),
-(10, 4, '400', DATE('2020-05-05')),
-(10, 4, '400', DATE('2023-05-05')),
-(11, 5, '500', DATE('2024-05-05')),
-(12, 6, '600', DATE('2025-05-05'));
+(3, 1, '100', DATE('2020-05-05'), 'paypal'),
+(3, 1, '100', DATE('2018-05-05'), 'paypal'),
+(5, 2, '200', DATE('2021-05-05'), 'card'),
+(6, 3, '300', DATE('2022-05-05'), 'card'),
+(10, 4, '400', DATE('2017-05-05'), 'paypal'),
+(10, 4, '400', DATE('2020-05-05'), 'card'),
+(10, 4, '400', DATE('2023-05-05'), 'card'),
+(11, 5, '500', DATE('2024-05-05'), 'card'),
+(12, 6, '600', DATE('2025-05-05'), 'paypal');
 
 
 -- Playlist
