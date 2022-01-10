@@ -16,6 +16,8 @@ CREATE TABLE IF NOT EXISTS `youtube`.`user` (
   `sex` ENUM("male", "female") NULL,
   `country` VARCHAR(45) NULL,
   `postal_code` VARCHAR(5) NULL,
+  `creation_date` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `description` LONGTEXT NULL,
   PRIMARY KEY (`id_user`),
   UNIQUE INDEX `email_UNIQUE` (`email` ASC) VISIBLE,
   UNIQUE INDEX `username_UNIQUE` (`username` ASC) VISIBLE)
@@ -80,25 +82,6 @@ CREATE TABLE IF NOT EXISTS `youtube`.`video_labels` (
 ENGINE = InnoDB;
 
 
--- -----------------------------------------------------
--- Table `youtube`.`channel`
--- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `youtube`.`channel` (
-  `id_channel` INT NOT NULL AUTO_INCREMENT,
-  `name` VARCHAR(100) NOT NULL,
-  `description` LONGTEXT NULL,
-  `creation_date` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
-  `user` INT NOT NULL,
-  PRIMARY KEY (`id_channel`),
-  UNIQUE INDEX `name_UNIQUE` (`name` ASC) VISIBLE,
-  INDEX `user_channel_idx` (`user` ASC) VISIBLE,
-  CONSTRAINT `user_channel`
-    FOREIGN KEY (`user`)
-    REFERENCES `youtube`.`user` (`id_user`)
-    ON DELETE CASCADE
-    ON UPDATE CASCADE)
-ENGINE = InnoDB;
-
 
 -- -----------------------------------------------------
 -- Table `youtube`.`subscriptions`
@@ -107,17 +90,17 @@ CREATE TABLE IF NOT EXISTS `youtube`.`subscriptions` (
   `id_user` INT NOT NULL,
   `id_channel` INT NOT NULL,
   PRIMARY KEY (`id_user`, `id_channel`),
-  INDEX `channel_user_idx` (`id_channel` ASC) VISIBLE,
+  INDEX `user_subscription_user_idx` (`id_channel` ASC) VISIBLE,
   CONSTRAINT `user_subscription_channel`
     FOREIGN KEY (`id_user`)
     REFERENCES `youtube`.`user` (`id_user`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
-  CONSTRAINT `channel_subscription_user`
+  CONSTRAINT `user_subscription_user`
     FOREIGN KEY (`id_channel`)
-    REFERENCES `youtube`.`channel` (`id_channel`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
+    REFERENCES `youtube`.`user` (`id_user`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE)
 ENGINE = InnoDB;
 
 
